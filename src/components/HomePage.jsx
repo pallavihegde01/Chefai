@@ -39,6 +39,9 @@ const HomePage = () => {
     }
   }
 
+  const removeIngredient = (indexToRemove) => {
+    setList(list.filter((_, index) => index !== indexToRemove));
+  };
 
   return (
     <div>
@@ -63,13 +66,22 @@ const HomePage = () => {
             {list.length  ? <div className='w-full max-w-xl pl-5'>
             <h3 className='text-xl font-semibold'>Ingredients on hand: </h3>
             <ul className='list-disc pl-5 pt-2'>
-                {list.map((item,index)=>(
+              {list.map((item,index)=>(
                 <li key={index}
                     className='text-lg'
                 >
-                    {item}
+                    <span>{item}</span>
+                    {!loading && !recipeMarkdown && (
+                      <button
+                        onClick={() => removeIngredient(index)}
+                        className="ml-4 text-red-600 hover:text-red-800 font-bold"
+                        title="Remove ingredient"
+                      >
+                        ✕
+                      </button>
+                    )}
                 </li>
-                ))}
+              ))}
             </ul>
         </div> : null}
         </form>

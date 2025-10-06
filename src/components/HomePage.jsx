@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Header from '../Pages/Header';
 import Ingredients from '../Pages/Ingredients';
 import Recipe from './AiRecipe';
@@ -10,6 +10,13 @@ const HomePage = () => {
   const [inputValue,setInputValue] = useState("");
   const [recipeMarkdown, setRecipeMarkdown] = useState("");
   const [loading, setLoading] = useState(false);
+  const recipeContent = useRef(null);
+
+  useEffect(()=>{
+    if(recipeMarkdown!="" && recipeContent!=null){
+      recipeContent.current.scrollIntoView({ behavior: "smooth" });
+    }
+  },[recipeMarkdown]);
 
     const handleSubmit = (e) =>{
       e.preventDefault();
@@ -93,7 +100,7 @@ const HomePage = () => {
           </div>
         )}
 
-        {!loading && recipeMarkdown && <Recipe recipeMarkdown={recipeMarkdown} />}
+        {!loading && recipeMarkdown && <Recipe ref={recipeContent} recipeMarkdown={recipeMarkdown} />}
     </div>
   )
 }

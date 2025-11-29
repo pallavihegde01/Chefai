@@ -1,5 +1,7 @@
 
-import { HfInference } from "@huggingface/inference";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
 
 const SYSTEM_PROMPT = `
 You are an assistant that receives a list of ingredients that a user has and suggests a recipe they could make with some or all of those ingredients. 
@@ -8,7 +10,6 @@ The recipe can include additional ingredients they didn't mention, but try not t
 Format your response in markdown to make it easier to render to a web page.
 `;
 
-const hf = new HfInference(process.env.HF_ACCESS_TOKEN);
 
 export default async function getRecipeFromAi(req, res) {
    
@@ -19,19 +20,21 @@ export default async function getRecipeFromAi(req, res) {
 
   try {
     const { ingredients } = req.body;
+    
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const prompt = `
+      ${SYSTEM_PROMPT}
 
-    const response = await hf.chatCompletion({
-      model: "mistralai/Mixtral-8x7B-Instruct-v0.1",
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: `I have ${ingredients.join(", ")}. Please give me a recipe you'd recommend I make!` },
-      ],
-      max_tokens: 1024,
-    });
+      User ingredients: ${ingredients.join(", ")}
+      Please suggest one recipe I can make.
+          `;
+    const result = await model.generateContent(prompt);
+    const responseText = result.response.text();
 
-    res.status(200).json({ recipe: response.choices[0].message.content });
+    res.status(200).json({ recipe: responseText });
+    // res.status(200).json({ recipe: response.choices[0].message.content });
   } catch (err) {
-    console.error("Hugging Face error:", err);
+    console.error("Gemini error:", err);
     res.status(500).json({ error: err.message });
   }
 }
